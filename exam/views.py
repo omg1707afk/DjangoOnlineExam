@@ -1,6 +1,6 @@
-﻿from django.shortcuts import get_object_or_404, render
-from .models import OnlineCourse, Lesson, Choice, Submission
-
+﻿
+from django.shortcuts import get_object_or_404, render, redirect
+from .models import OnlineCourse, Lesson, Question, Choice, Submission
 
 def course_details(request, course_id):
     course = get_object_or_404(
@@ -23,7 +23,9 @@ def mock_exam(request, lesson_id):
     result = None
 
     if request.method == "POST":
-        student_name = request.POST.get("student_name", "").strip() or "Student"
+        student_name = (
+            request.POST.get("student_name", "").strip() or "Student"
+        )
         score = 0
 
         for question in questions:
@@ -52,3 +54,52 @@ def mock_exam(request, lesson_id):
         "questions": questions,
         "result": result,
     })
+
+
+def submit(request, course_id):
+    course = get_object_or_404(OnlineCourse, pk=course_id)
+
+    if request.method != "POST":
+        return redirect("exam:course_details", course_id=course.id)
+
+    questions = Question.objects.filter(lesson__course=course)
+    student_name = (
+        request.POST.get("student_name", "").strip() or "Student"
+    )
+    score = 0
+
+    for question in questions:
+        choice_id = request.POST.get(f"question_{question.id}")
+        if choice_id and Choice.objects.filter(
+            pk=choice_id,
+            question=question,
+            is_correct=True
+        ).exists():
+            score += 1
+
+    submission = Submission.objects.create(
+        student_name=student_name,
+        score=score,
+        total_questions=questions.count()
+    )
+
+    return redirect(
+        "exam:show_exam_result",
+        course_id=course.id,
+        submission_id=submission.id
+    )
+
+
+def show_exam_result(request, course_id, submission_id):
+    course = get_object_or_404(OnlineCourse, pk=course_id)
+    submission = get_object_or_404(
+        Submission,
+        pk=submission_id
+    )
+
+    return render(request, "exam/exam_result.html", {
+        "course": course,
+        "submission": submission,
+    })
+
+    

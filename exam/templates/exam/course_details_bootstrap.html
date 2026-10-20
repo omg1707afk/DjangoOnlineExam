@@ -47,6 +47,11 @@
                     <p class="mb-0">
                         {{ lesson.content|default:"Lesson content will be available soon." }}
                     </p>
+                    <div class="mt-3">
+                        <a href="{% url 'exam:mock_exam' lesson.id %}" class="btn btn-primary btn-sm">
+                            Start Mock Exam
+                        </a>
+                    </div>
                 </div>
             </div>
         {% empty %}

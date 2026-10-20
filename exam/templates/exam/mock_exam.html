@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -24,7 +24,10 @@
                         <p>Good effort! Keep practicing to improve your score.</p>
                     {% endif %}
                 </div>
-                <a href="{% url 'exam:mock_exam' lesson.id %}" class="btn btn-primary">Try Again</a>
+                <div class="d-flex justify-content-center gap-2 mt-3">
+                    <a href="{% url 'exam:mock_exam' lesson.id %}" class="btn btn-primary">Try Again</a>
+                    <a href="{% url 'exam:course_details' lesson.course.id %}" class="btn btn-outline-secondary">Back to Course</a>
+                </div>
             {% else %}
                 <form method="post">
                     {% csrf_token %}
